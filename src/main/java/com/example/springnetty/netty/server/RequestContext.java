@@ -4,6 +4,7 @@ package com.example.springnetty.netty.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -76,6 +77,14 @@ public class RequestContext extends ConcurrentHashMap<String,Object> {
         set("requestEntity",requestEntity);
     }
 
+    //储存响应
+    public ResponseEntity getResponseEntity() {
+        return (ResponseEntity) get("responseEntity");
+    }
+
+    public void setResponseEntity(ResponseEntity responseEntity) {
+        set("responseEntity",responseEntity);
+    }
 
     public void set(String key,Object value) {
         if(value!=null) {

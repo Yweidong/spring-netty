@@ -1,8 +1,11 @@
 package com.example.springnetty.netty.handler;
 
+import com.alibaba.fastjson.JSONObject;
+import com.example.springnetty.common.ResponseJson;
 import com.example.springnetty.config.GateWayConfig;
 import com.example.springnetty.config.SetScanner;
 import com.example.springnetty.filter.TuulFilter;
+import com.example.springnetty.netty.Exception.TuulException;
 import com.example.springnetty.netty.config.NettyConfig;
 import com.example.springnetty.netty.dispatcher.RequestDispatcher;
 
@@ -40,48 +43,37 @@ import java.util.concurrent.Future;
 @ChannelHandler.Sharable
 public class HttpServerHandler extends ChannelInboundHandlerAdapter {
   private TuulRunner tuulRunner =   new TuulRunner();
-      @Autowired
-      SetScanner setScanner;
-    private static HttpServerHandler httpServerHandler;
-    @PostConstruct
-    public void init() {
-        httpServerHandler= this;
-    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         if(msg instanceof FullHttpRequest) {
-            HashMap<String, Object> map = httpServerHandler.setScanner.run();
-            tuulRunner.init(ctx, (FullHttpRequest)msg,map);
+
             try{
                 tuulRunner.preRoute();
                 tuulRunner.route();
                 tuulRunner.postRoute();
-            }finally {
+            }  finally {
                 //清除
                 RequestContext.getCurrentContext().unset();
             }
 
 
+
         }
+
     }
 
-    //    @Override
-//    protected void channelRead0(ChannelHandlerContext channelHandlerContext, HttpObject httpObject) throws Exception {
-//        if(httpObject instanceof FullHttpRequest) {
-////            Map<String, String> parse = new RequestParser((FullHttpRequest) httpObject).parse();
-////            System.out.println(parse);
-//            requestDispatcher.dispatcher(channelHandlerContext, (FullHttpRequest)httpObject);//请求分发
-////            String name = ((HttpRequest) httpObject).method().name();//请求方式
-////            System.out.println(name);
-////            ByteBuf byteBuf = Unpooled.copiedBuffer("Hello World", CharsetUtil.UTF_8);
-////            //构造http响应
-////            FullHttpResponse fullHttpResponse= new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-////                    HttpResponseStatus.OK, byteBuf);
-////            fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE,"text/plain");//设置响应头
-////            fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_LENGTH,byteBuf.readableBytes());
-////            channelHandlerContext.writeAndFlush(fullHttpResponse);//返回响应到客户端
-//        }
-//    }
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        HashMap<String, Object> map = new HashMap<>();
+        if(cause instanceof TuulException) {
+            TuulException cause1 = (TuulException) cause;
+
+            new ResponseJson(ctx, String.valueOf(JSONObject.toJSON(cause1))).response();
+        }
+        log.info(cause.getMessage());
+
+        ctx.close();
+    }
 }

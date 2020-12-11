@@ -6,6 +6,9 @@ import com.example.springnetty.netty.config.NettyConfig;
 
 import com.example.springnetty.netty.constant.NettyConstant;
 import com.example.springnetty.netty.handler.HttpServerHandler;
+import com.example.springnetty.netty.handler.InitSettingInHandler;
+
+
 import com.example.springnetty.util.SpringContextUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -15,6 +18,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.logging.LogLevel;
@@ -42,10 +46,6 @@ public class Nettyserver {
     @Resource
     NettyConfig nettyConfig;
 
-
-
-
-
     /**
      *
      * 启动服务
@@ -64,9 +64,20 @@ public class Nettyserver {
 //                                    pipeline.addLast(new LengthFieldBasedFrameDecoder(NettyConstant.getMaxFrameLength(),
 //                                            0,2,0,2));
 //                                    pipeline.addLast(new LengthFieldPrepender(2));
+
+//
+
                                     pipeline.addLast(new HttpServerCodec());
+
+
                                     pipeline.addLast("httpAggregator",new HttpObjectAggregator(512*1024)); // http 消息聚合器
+
+                                    pipeline.addLast(new InitSettingInHandler());
+
                                     pipeline.addLast(new HttpServerHandler());
+
+
+
                                 }
                             });
             log.info("netty服务器在[{}]端口启动监听",nettyConfig.getPort());

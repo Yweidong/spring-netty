@@ -36,7 +36,8 @@ public class RequestWrapperFilter extends TuulFilter {
     }
 
     @Override
-    public void run() throws Exception {
+    public void run() {
+
         RequestContext context = RequestContext.getCurrentContext();
         String routeName = context.getRouteName();
         HashMap<String, Object> hashMap = context.getHashMap();
@@ -46,7 +47,11 @@ public class RequestWrapperFilter extends TuulFilter {
                 .replaceAll("\\?(.*)", "");
         String rootURL = (String) hashMap.get(routeName)+apipath;//获取请求远程的url
         RequestEntity<String> requestEntity = null;
-        requestEntity = createRequestEntity(fullHttpRequest,rootURL);
+        try {
+            requestEntity = createRequestEntity(fullHttpRequest,rootURL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         log.info(requestEntity.toString());
         context.setRequestEntity(requestEntity);
 

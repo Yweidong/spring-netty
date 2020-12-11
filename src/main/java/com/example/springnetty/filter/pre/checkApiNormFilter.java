@@ -3,10 +3,9 @@ package com.example.springnetty.filter.pre;
 
 import com.example.springnetty.common.ResponseJson;
 
-import com.example.springnetty.common.Result;
-import com.example.springnetty.common.ResultStatus;
 
 import com.example.springnetty.filter.TuulFilter;
+import com.example.springnetty.netty.Exception.TuulException;
 import com.example.springnetty.netty.server.RequestContext;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -41,14 +40,14 @@ public class checkApiNormFilter extends TuulFilter {
     }
 
     @Override
-    public void run() throws Exception {
+    public void run() throws TuulException {
         RequestContext context = RequestContext.getCurrentContext();
         FullHttpRequest request = context.getFullHttpRequest();
         ChannelHandlerContext ctx = context.getChannelHandler();
         HashMap<String, Object> hashMap = context.getHashMap();
         String uri = request.uri();
         if(uri.equals("/")) {
-            new ResponseJson<Result>(ctx, new Result(ResultStatus.PATH_ERROR,"请求地址不在配置文件中")).response();
+            new ResponseJson(ctx, "请求地址不在配置文件中").response();
         }
 
        String[] split = uri.replaceAll("\\?(.*)","").split("\\/");
@@ -62,7 +61,7 @@ public class checkApiNormFilter extends TuulFilter {
             }
         }
         if(flag == 0) {
-            new ResponseJson<Result>(ctx, new Result(ResultStatus.PATH_ERROR,"请求地址不在配置文件中")).response();
+            new ResponseJson(ctx, "请求地址不在配置文件中").response();
         }
 
         context.setRouteName(path);

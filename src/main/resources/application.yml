@@ -8,7 +8,7 @@ api-gateway:
     - name: test
       url: 123.206.232.137
     - name: haha
-      url: 106.15.251.237
+      url: http://127.0.0.1:8083
 spring:
   redis:
     host: 123.206.232.137
